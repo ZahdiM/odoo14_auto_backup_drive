@@ -197,7 +197,7 @@ class DbBackup(models.Model):
 
                 notification_template = self.env['ir.model.data'].sudo().get_object('auto_backup_upload',
                                                                                     'email_google_drive_upload')
-                values = notification_template.generate_email(self.id)
+                values = notification_template.generate_email(self.id or rec.id,['subject', 'body_html', 'email_from', 'email_to', 'partner_to', 'email_cc', 'reply_to', 'scheduled_date'])
                 values['email_from'] = self.env['res.users'].browse(self.env.uid).company_id.email
                 values['email_to'] = email_to
                 values['subject'] = "Google Drive Upload Successful"
@@ -221,7 +221,7 @@ class DbBackup(models.Model):
 
                 notification_template = self.env['ir.model.data'].sudo().get_object('auto_backup_upload',
                                                                                     'email_google_drive_upload')
-                values = notification_template.generate_email(self.id)
+                values = notification_template.generate_email(self.id or rec.id,['subject', 'body_html', 'email_from', 'email_to', 'partner_to', 'email_cc', 'reply_to', 'scheduled_date'])
                 values['email_from'] = self.env['res.users'].browse(self.env.uid).company_id.email
                 values['email_to'] = email_to
                 values['subject'] = "Google Drive Upload Failed"
@@ -259,7 +259,7 @@ class DbBackup(models.Model):
                 'fields': "nextPageToken,files(id,name, createdTime, modifiedTime, mimeType)"
             }
             url = "/drive/v3/files"
-            status, content, ask_time = self.env['google.service']._do_request(url, params, headers, type='GET')
+            status, content, ask_time = self.env['google.service']._do_request(url, params, headers)
 
             for item in content['files']:
                 date_today = datetime.datetime.today().date()
@@ -271,4 +271,4 @@ class DbBackup(models.Model):
                         'access_token': access_token
                     }
                     url = "/drive/v3/files/%s" % (item['id'])
-                    response = self.env['google.service']._do_request(url, params, headers, type='DELETE')
+                    response = self.env['google.service']._do_request(url, params, headers)
